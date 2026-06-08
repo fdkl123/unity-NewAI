@@ -20,6 +20,7 @@ class ProjectAnswers:
     ai_help_expected: list[str]
     art_direction: str = "undecided"
     online_mode: str = "single-player"
+    follow_up_answers: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

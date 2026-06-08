@@ -12,7 +12,12 @@ from bootstrapper.artifacts import build_scaffold_manifest, write_confirmed_arti
 from bootstrapper.cli import main
 from bootstrapper.diagnosis import diagnose_project
 from bootstrapper.models import BootstrapperSession, ProjectAnswers
+from bootstrapper.questionnaire import conditional_followup_questions
+from bootstrapper.scaffold import create_unity_project_files
 from bootstrapper.skills import resolve_skills
+from context.unity_project_scanner import scan_unity_project
+from agents.performance_optimizer.static_analyzer import analyze_project
+from verification.runner import run_verification_commands
 
 
 class BootstrapperTests(unittest.TestCase):
@@ -49,6 +54,12 @@ class BootstrapperTests(unittest.TestCase):
         self.assertIn("unity-performance", skill_names)
         self.assertIn("memory-management", skill_names)
         self.assertIn("testing-verification", skill_names)
+
+    def test_conditional_followups_for_action_roguelike(self) -> None:
+        questions = conditional_followup_questions(self.make_answers())
+
+        self.assertIn("combat_scale", questions)
+        self.assertIn("run_structure", questions)
 
     def test_artifact_writer_creates_confirmed_files(self) -> None:
         answers = self.make_answers()
@@ -114,6 +125,115 @@ class BootstrapperTests(unittest.TestCase):
         )
 
         self.assertEqual(build_scaffold_manifest(session), build_scaffold_manifest(session))
+
+    def test_scaffold_creates_unity_project_files_and_packages(self) -> None:
+        answers = self.make_answers()
+        diagnosis = diagnose_project(answers)
+        session = BootstrapperSession(
+            session_id="bootstrap_test",
+            status="confirmed",
+            answers=answers,
+            diagnosis=diagnosis,
+            skills=[],
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_dir = Path(temp_dir)
+            manifest = build_scaffold_manifest(session)
+            create_unity_project_files(output_dir, manifest, install_packages=True)
+
+            self.assertTrue((output_dir / "Assets" / "_Project" / "README.md").exists())
+            self.assertTrue((output_dir / "Packages" / "manifest.json").exists())
+            self.assertTrue((output_dir / "ProjectSettings" / "ProjectVersion.txt").exists())
+            package_manifest = json.loads((output_dir / "Packages" / "manifest.json").read_text(encoding="utf-8"))
+            self.assertIn("com.unity.inputsystem", package_manifest["dependencies"])
+
+    def test_unity_project_scanner_detects_project(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "Assets" / "_Project" / "Runtime").mkdir(parents=True)
+            (root / "Packages").mkdir()
+            (root / "ProjectSettings").mkdir()
+            (root / "ProjectSettings" / "ProjectVersion.txt").write_text("m_EditorVersion: 6000.0.0f1\n", encoding="utf-8")
+            (root / "Packages" / "manifest.json").write_text(
+                json.dumps({"dependencies": {"com.unity.render-pipelines.universal": "17.0.3"}}),
+                encoding="utf-8",
+            )
+            (root / "Assets" / "_Project" / "Runtime" / "Player.cs").write_text("public class Player {}", encoding="utf-8")
+
+            summary = scan_unity_project(root)
+
+            self.assertTrue(summary["unity"]["is_unity_project"])
+            self.assertEqual(summary["unity"]["render_pipeline"], "URP")
+            self.assertEqual(summary["unity"]["script_count"], 1)
+
+    def test_static_analyzer_finds_hot_path_issues(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            script = root / "Assets" / "_Project" / "Runtime" / "EnemySpawner.cs"
+            script.parent.mkdir(parents=True)
+            script.write_text(
+                """
+using UnityEngine;
+public class EnemySpawner : MonoBehaviour {
+  void Update() {
+    var rb = GetComponent<Rigidbody>();
+    Instantiate(gameObject);
+    Physics.Raycast(transform.position, transform.forward);
+  }
+}
+""",
+                encoding="utf-8",
+            )
+
+            findings = analyze_project(root)
+
+            categories = {finding["category"] for finding in findings}
+            self.assertIn("cpu", categories)
+            self.assertIn("object_lifecycle", categories)
+            self.assertIn("physics", categories)
+
+    def test_verification_runner_records_command_result(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            report = run_verification_commands(["python --version"], root)
+
+            self.assertEqual(report["status"], "passed")
+            self.assertTrue((root / ".orchestrator" / "reports" / "verification-report.json").exists())
+
+    def test_cli_confirm_can_create_unity_project(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            exit_code = main(
+                [
+                    "new",
+                    "--non-interactive",
+                    "--confirm",
+                    "--create-unity-project",
+                    "--install-packages",
+                    "--output-dir",
+                    temp_dir,
+                    "--project-name",
+                    "GeneratedGame",
+                    "--idea",
+                    "Mobile 3D action prototype.",
+                    "--dimension",
+                    "3D",
+                    "--platforms",
+                    "Android",
+                    "--core-action",
+                    "Fight enemies.",
+                    "--first-playable",
+                    "movement,combat",
+                    "--team",
+                    "solo",
+                    "--ai-help",
+                    "planning,performance",
+                ]
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue((Path(temp_dir) / "ProjectSettings" / "ProjectVersion.txt").exists())
+            self.assertTrue((Path(temp_dir) / "conductor" / "project-brief.md").exists())
 
 
 if __name__ == "__main__":
