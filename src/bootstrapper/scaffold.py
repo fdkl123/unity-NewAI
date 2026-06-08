@@ -46,6 +46,24 @@ def create_unity_project_files(output_dir: Path, manifest: dict, install_package
     _write(packages_lock, json.dumps({"dependencies": {}}, indent=2) + "\n")
     created.append(packages_lock)
 
+    verification_config = output_dir / ".orchestrator" / "verification.json"
+    _write(
+        verification_config,
+        json.dumps(
+            {
+                "commands": [],
+                "notes": [
+                    "Add project-specific commands here, for example Unity batchmode tests or Python tooling checks.",
+                    "The `unity-ai verify` command reads this file when no --command is provided.",
+                ],
+            },
+            indent=2,
+            ensure_ascii=False,
+        )
+        + "\n",
+    )
+    created.append(verification_config)
+
     return created
 
 

@@ -30,6 +30,7 @@ def build_scaffold_manifest(session: BootstrapperSession) -> dict:
         "conductor/risk-register.md",
         "conductor/mvp-plan.md",
         "conductor/performance-budget.md",
+        ".orchestrator/verification.json",
         "scaffold-manifest.json",
     ]
     packages = []

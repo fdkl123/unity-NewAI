@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from agents.performance_optimizer.static_analyzer import write_performance_report
 from context.unity_project_scanner import write_project_summary
-from verification.runner import run_verification_commands
+from verification.runner import run_verification_commands, run_verification_from_config
 
 from .artifacts import build_scaffold_manifest, render_confirmation_preview, write_confirmed_artifacts
 from .diagnosis import diagnose_project
@@ -71,7 +71,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     verify_parser = subparsers.add_parser("verify", help="Run verification commands and write a report.")
     verify_parser.add_argument("--project-dir", default=".", help="Project directory.")
-    verify_parser.add_argument("--command", action="append", required=True, help="Verification command. Can be repeated.")
+    verify_parser.add_argument("--command", action="append", help="Verification command. Can be repeated.")
+    verify_parser.add_argument("--config", default=None, help="Verification config path. Defaults to .orchestrator/verification.json.")
     verify_parser.add_argument("--output", default=None, help="Output JSON path.")
     return parser
 
@@ -139,9 +140,13 @@ def run_performance_review(args: argparse.Namespace) -> int:
 def run_verify(args: argparse.Namespace) -> int:
     project_dir = Path(args.project_dir)
     output = Path(args.output) if args.output else None
-    report = run_verification_commands(args.command, project_dir, output)
+    if args.command:
+        report = run_verification_commands(args.command, project_dir, output)
+    else:
+        config = Path(args.config) if args.config else None
+        report = run_verification_from_config(project_dir, config, output)
     print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 0 if report["status"] == "passed" else 1
+    return 0 if report["status"] in {"passed", "skipped"} else 1
 
 
 if __name__ == "__main__":

@@ -83,6 +83,30 @@ python -m bootstrapper.cli new --non-interactive --confirm `
 → 脚手架清单和上下文文件
 ```
 
+### 验证流水线
+
+`unity-ai verify` 支持两种方式：
+
+```powershell
+$env:PYTHONPATH="src"
+python -m bootstrapper.cli verify --project-dir ./out/ArenaPrototype --command "python --version"
+```
+
+或读取 `.orchestrator/verification.json`：
+
+```json
+{
+  "commands": [
+    "python --version"
+  ]
+}
+```
+
+```powershell
+$env:PYTHONPATH="src"
+python -m bootstrapper.cli verify --project-dir ./out/ArenaPrototype
+```
+
 ### 当前状态
 
 已实现：`unity-ai new` CLI、条件式第二轮问诊、确定性诊断、技能解析、确认预览、上下文文件生成、最小 Unity 工程文件生成、Unity package manifest 写入、已有 Unity 项目扫描、静态性能分析器、验证流水线 runner、单元测试。
@@ -168,6 +192,30 @@ Game idea
 → Project brief preview
 → User confirmation
 → Scaffold manifest and context artifacts
+```
+
+### Verification Pipeline
+
+`unity-ai verify` supports direct commands:
+
+```powershell
+$env:PYTHONPATH="src"
+python -m bootstrapper.cli verify --project-dir ./out/ArenaPrototype --command "python --version"
+```
+
+Or `.orchestrator/verification.json`:
+
+```json
+{
+  "commands": [
+    "python --version"
+  ]
+}
+```
+
+```powershell
+$env:PYTHONPATH="src"
+python -m bootstrapper.cli verify --project-dir ./out/ArenaPrototype
 ```
 
 ### Current Status

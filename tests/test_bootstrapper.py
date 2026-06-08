@@ -17,7 +17,7 @@ from bootstrapper.scaffold import create_unity_project_files
 from bootstrapper.skills import resolve_skills
 from context.unity_project_scanner import scan_unity_project
 from agents.performance_optimizer.static_analyzer import analyze_project
-from verification.runner import run_verification_commands
+from verification.runner import load_verification_commands, run_verification_commands, run_verification_from_config
 
 
 class BootstrapperTests(unittest.TestCase):
@@ -145,6 +145,7 @@ class BootstrapperTests(unittest.TestCase):
             self.assertTrue((output_dir / "Assets" / "_Project" / "README.md").exists())
             self.assertTrue((output_dir / "Packages" / "manifest.json").exists())
             self.assertTrue((output_dir / "ProjectSettings" / "ProjectVersion.txt").exists())
+            self.assertTrue((output_dir / ".orchestrator" / "verification.json").exists())
             package_manifest = json.loads((output_dir / "Packages" / "manifest.json").read_text(encoding="utf-8"))
             self.assertIn("com.unity.inputsystem", package_manifest["dependencies"])
 
@@ -200,6 +201,23 @@ public class EnemySpawner : MonoBehaviour {
 
             self.assertEqual(report["status"], "passed")
             self.assertTrue((root / ".orchestrator" / "reports" / "verification-report.json").exists())
+
+    def test_verification_runner_reads_config(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            config = root / ".orchestrator" / "verification.json"
+            config.parent.mkdir(parents=True)
+            config.write_text(json.dumps({"commands": ["python --version"]}), encoding="utf-8")
+
+            self.assertEqual(load_verification_commands(root), ["python --version"])
+            report = run_verification_from_config(root)
+            self.assertEqual(report["status"], "passed")
+
+    def test_verification_runner_skips_without_config(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report = run_verification_from_config(Path(temp_dir))
+
+            self.assertEqual(report["status"], "skipped")
 
     def test_cli_confirm_can_create_unity_project(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
