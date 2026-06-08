@@ -109,7 +109,7 @@ python -m bootstrapper.cli verify --project-dir ./out/ArenaPrototype
 
 ### 当前状态
 
-已实现：`unity-ai new` CLI、条件式第二轮问诊、确定性诊断、技能解析、确认预览、上下文文件生成、最小 Unity 工程文件生成、Unity package manifest 写入、已有 Unity 项目扫描、静态性能分析器、验证流水线 runner、单元测试。
+已实现：`unity-ai new` CLI、条件式第二轮问诊、确定性诊断、技能解析、确认预览、上下文文件生成、Unity 工程脚手架文件生成、基础 C# 模板、asmdef、示例 Scene、Unity package manifest 写入、已有 Unity 项目扫描、静态性能分析器、Markdown/JSON 报告、验证流水线 runner、单元测试。
 
 未实现：Unity Editor 自动启动、Unity Package Manager 在线解析、Profiler 数据导入、AST 级 C# 自动修复、可视化 UI。
 
@@ -220,7 +220,7 @@ python -m bootstrapper.cli verify --project-dir ./out/ArenaPrototype
 
 ### Current Status
 
-Implemented: `unity-ai new` CLI, conditional second-round questionnaire, deterministic diagnosis, skill resolution, confirmation preview, artifact generation, minimal Unity project file generation, Unity package manifest writing, existing Unity project scanner, static performance analyzer, verification runner, and unit tests.
+Implemented: `unity-ai new` CLI, conditional second-round questionnaire, deterministic diagnosis, skill resolution, confirmation preview, artifact generation, Unity scaffold file generation, basic C# templates, asmdef files, sample Scene, Unity package manifest writing, existing Unity project scanner, static performance analyzer, Markdown/JSON reports, verification runner, and unit tests.
 
 Not implemented yet: automatic Unity Editor launch, online Unity Package Manager resolution, Profiler data ingestion, AST-level C# auto-fixes, and visual UI.
 
@@ -307,7 +307,7 @@ python -m bootstrapper.cli new --non-interactive --confirm `
 
 ### 現在の状態
 
-実装済み: `unity-ai new` CLI、条件分岐の第 2 回質問、決定的な診断、スキル解決、確認プレビュー、成果物生成、最小 Unity プロジェクトファイル生成、Unity package manifest 書き込み、既存 Unity プロジェクトスキャナー、静的パフォーマンス分析器、検証 runner、単体テスト。
+実装済み: `unity-ai new` CLI、条件分岐の第 2 回質問、決定的な診断、スキル解決、確認プレビュー、成果物生成、Unity スキャフォールドファイル生成、基本 C# テンプレート、asmdef、サンプル Scene、Unity package manifest 書き込み、既存 Unity プロジェクトスキャナー、静的パフォーマンス分析器、Markdown/JSON レポート、検証 runner、単体テスト。
 
 未実装: Unity Editor の自動起動、Unity Package Manager のオンライン解決、Profiler データ取り込み、AST レベルの C# 自動修正、ビジュアル UI。
 
@@ -394,6 +394,6 @@ python -m bootstrapper.cli new --non-interactive --confirm `
 
 ### 현재 상태
 
-구현됨: `unity-ai new` CLI, 조건부 2차 질문, 결정적 진단, 스킬 해석, 확인 프리뷰, 산출물 생성, 최소 Unity 프로젝트 파일 생성, Unity package manifest 작성, 기존 Unity 프로젝트 스캐너, 정적 성능 분석기, 검증 runner, 단위 테스트.
+구현됨: `unity-ai new` CLI, 조건부 2차 질문, 결정적 진단, 스킬 해석, 확인 프리뷰, 산출물 생성, Unity 스캐폴드 파일 생성, 기본 C# 템플릿, asmdef, 샘플 Scene, Unity package manifest 작성, 기존 Unity 프로젝트 스캐너, 정적 성능 분석기, Markdown/JSON 보고서, 검증 runner, 단위 테스트.
 
 아직 미구현: Unity Editor 자동 실행, Unity Package Manager 온라인 해석, Profiler 데이터 수집, AST 수준 C# 자동 수정, 시각적 UI.

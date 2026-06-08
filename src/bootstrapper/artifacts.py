@@ -13,8 +13,12 @@ def build_scaffold_manifest(session: BootstrapperSession) -> dict:
     profile = "_".join(tag.lower().replace("-", "_") for tag in diagnosis.project_type[:4])
     directories = [
         "Assets/_Project/Runtime",
+        "Assets/_Project/Runtime/Core",
+        "Assets/_Project/Runtime/Gameplay",
+        "Assets/_Project/Runtime/Infrastructure",
         "Assets/_Project/Editor",
         "Assets/_Project/Tests",
+        "Assets/_Project/Tests/EditMode",
         "Assets/_Project/Scenes",
         "Assets/_Project/Prefabs",
         "Assets/_Project/ScriptableObjects",

@@ -16,7 +16,7 @@ from bootstrapper.questionnaire import conditional_followup_questions
 from bootstrapper.scaffold import create_unity_project_files
 from bootstrapper.skills import resolve_skills
 from context.unity_project_scanner import scan_unity_project
-from agents.performance_optimizer.static_analyzer import analyze_project
+from agents.performance_optimizer.static_analyzer import analyze_project, write_performance_report
 from verification.runner import load_verification_commands, run_verification_commands, run_verification_from_config
 
 
@@ -143,6 +143,11 @@ class BootstrapperTests(unittest.TestCase):
             create_unity_project_files(output_dir, manifest, install_packages=True)
 
             self.assertTrue((output_dir / "Assets" / "_Project" / "README.md").exists())
+            self.assertTrue((output_dir / "Assets" / "_Project" / "Runtime" / "Runtime.asmdef").exists())
+            self.assertTrue((output_dir / "Assets" / "_Project" / "Runtime" / "Core" / "GameBootstrap.cs").exists())
+            self.assertTrue((output_dir / "Assets" / "_Project" / "Runtime" / "Infrastructure" / "ObjectPool.cs").exists())
+            self.assertTrue((output_dir / "Assets" / "_Project" / "Tests" / "EditMode" / "BootstrapSmokeTest.cs").exists())
+            self.assertTrue((output_dir / ".orchestrator" / "rules" / "performance-rules.json").exists())
             self.assertTrue((output_dir / "Packages" / "manifest.json").exists())
             self.assertTrue((output_dir / "ProjectSettings" / "ProjectVersion.txt").exists())
             self.assertTrue((output_dir / ".orchestrator" / "verification.json").exists())
@@ -193,6 +198,10 @@ public class EnemySpawner : MonoBehaviour {
             self.assertIn("cpu", categories)
             self.assertIn("object_lifecycle", categories)
             self.assertIn("physics", categories)
+
+            write_performance_report(root)
+            self.assertTrue((root / ".orchestrator" / "reports" / "performance-findings.json").exists())
+            self.assertTrue((root / ".orchestrator" / "reports" / "performance-findings.md").exists())
 
     def test_verification_runner_records_command_result(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

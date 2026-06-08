@@ -20,7 +20,35 @@ def write_performance_report(root: Path, output_path: Path | None = None) -> lis
     output_path = output_path or root / ".orchestrator" / "reports" / "performance-findings.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps({"findings": findings}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    markdown_path = output_path.with_suffix(".md")
+    markdown_path.write_text(render_markdown_report(findings), encoding="utf-8")
     return findings
+
+
+def render_markdown_report(findings: list[dict]) -> str:
+    lines = ["# Unity Performance Findings", ""]
+    if not findings:
+        lines.extend(["No static performance findings detected.", ""])
+        return "\n".join(lines)
+
+    lines.extend(
+        [
+            "| Severity | Category | Location | Evidence | Recommendation |",
+            "| --- | --- | --- | --- | --- |",
+        ]
+    )
+    for finding in findings:
+        lines.append(
+            "| {severity} | {category} | `{location}` | {evidence} | {recommendation} |".format(
+                severity=finding["severity"],
+                category=finding["category"],
+                location=finding["location"],
+                evidence=_escape_table(finding["evidence"]),
+                recommendation=_escape_table(finding["recommendation"]),
+            )
+        )
+    lines.append("")
+    return "\n".join(lines)
 
 
 def analyze_csharp_file(path: Path, root: Path | None = None) -> list[dict]:
@@ -77,3 +105,7 @@ def _finding(category: str, severity: str, path: str, line: int, evidence: str, 
         "evidence": evidence,
         "recommendation": recommendation,
     }
+
+
+def _escape_table(value: str) -> str:
+    return value.replace("|", "\\|").replace("\n", " ")
