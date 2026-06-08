@@ -1,0 +1,10 @@
+{
+  "id": "bootstrapper-001",
+  "title": "AI Unity Project Bootstrapper",
+  "status": "planned",
+  "priority": "P0",
+  "duration_weeks": 3,
+  "created": "2026-06-07",
+  "owners": ["product", "engineering"],
+  "target_users": ["solo game creator", "Unity gameplay engineer", "technical designer", "indie studio lead"]
+}

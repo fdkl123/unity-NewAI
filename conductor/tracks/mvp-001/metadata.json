@@ -1,0 +1,10 @@
+{
+  "id": "mvp-001",
+  "title": "Unity Performance Review and Optimization MVP",
+  "status": "planned",
+  "priority": "P0",
+  "duration_weeks": 6,
+  "created": "2026-06-05",
+  "owners": ["product", "engineering"],
+  "target_users": ["Unity gameplay engineer", "technical designer", "indie studio lead"]
+}
